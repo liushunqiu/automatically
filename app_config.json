@@ -1,0 +1,13 @@
+{
+    "simulator_path": "D:\\Program Files\\Nox\\bin",
+    "broker_package": "com.hexin.plat.android",
+    "simulator_exe_path": "",
+    "coordinates": {
+        "select_x": 201,
+        "select_y": 785,
+        "subscribe_x": 332,
+        "subscribe_y": 783,
+        "confirm_x": 197,
+        "confirm_y": 916
+    }
+}
