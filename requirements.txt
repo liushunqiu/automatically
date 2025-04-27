@@ -1,7 +1,9 @@
 PyQt6>=6.0.0 # 或者指定你使用的具体版本
-uiautomator2>=2.16.0 # 保持或更新版本
+uiautomator2==2.11.0 # 指定较低版本，避免版本兼容性问题
+packaging==20.9 # 添加特定版本的packaging
 pywin32>=300 # 保持或更新版本
 pyinstaller>=5.0.0 # 保持或更新版本
 peewee>=3.0.0 # 添加 peewee 依赖
+loguru>=0.6.0 # 添加loguru日志库依赖
 # 如果使用了 dbutils.pooled_db，也需要添加
 # DBUtils>=2.0

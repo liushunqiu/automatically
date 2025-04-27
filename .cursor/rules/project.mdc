@@ -1,0 +1,69 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 项目规则文档
+
+## 项目概述
+这是一个自动化交易系统，主要包含模拟器控制、UI界面和自动化交易功能。
+
+## 主要组件
+
+### 核心模块
+- `main.py`: 主程序入口，负责系统初始化和主要流程控制
+- `emulator.py`: 模拟器控制模块，处理模拟器的启动、关闭和操作
+- `simulator.py`: 模拟器配置和状态管理
+- `automation.py`: 自动化交易逻辑实现
+- `config.py`: 系统配置管理
+
+### 数据层
+- `mydatabase.db`: SQLite数据库文件
+- `entity/`: 数据模型和实体类目录
+
+### 用户界面
+- `ui/`: UI相关组件目录
+- 使用PyQt6框架构建界面
+
+### 工作进程
+- `workers/`: 后台工作进程目录
+
+## 依赖项
+- PyQt6: UI框架
+- uiautomator2: Android设备控制
+- pywin32: Windows系统API调用
+- pyinstaller: 应用打包
+- peewee: ORM数据库操作
+
+## 配置文件
+- `app_config.json`: 应用配置，包含模拟器路径、包名和坐标信息
+- `simulator_config.txt`: 模拟器配置
+- `requirements.txt`: Python依赖管理
+
+## 项目结构
+```
+.
+├── .cursor/          # Cursor IDE配置
+├── .git/            # Git版本控制
+├── workers/         # 工作进程
+├── ui/             # 用户界面组件
+├── entity/         # 数据模型
+├── mydatabase.db   # SQLite数据库
+├── requirements.txt # 项目依赖
+├── simulator.py    # 模拟器控制
+├── simulator_config.txt # 模拟器配置
+├── emulator.py     # 模拟器操作
+├── main.py         # 主程序
+├── app_config.json # 应用配置
+├── automation.py   # 自动化交易
+└── config.py       # 配置管理
+```
+
+## 开发规范
+1. 使用Python 3.x版本
+2. 遵循PEP 8编码规范
+3. 使用SQLite作为数据库
+4. 使用PyQt6构建UI界面
+5. 配置文件使用JSON格式
+
+

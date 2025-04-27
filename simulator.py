@@ -1,185 +1,127 @@
-import subprocess
-import win32gui
-import win32con
 import os
+import json
+import subprocess
 import time
-from config import Config
-from emulator import Emulator
+from loguru import logger
+from emulator_improved import EmulatorImproved
 
 class SimulatorController:
-    def __init__(self):
-        self.config = Config()
-        self.simulator_path = self.config.get_simulator_path()
-        self.adb_path = os.path.join(self.simulator_path, "adb.exe")
-        self.nox_path = os.path.join(self.simulator_path, "Nox.exe")
-        print(f"模拟器路径: {self.simulator_path}")
-        print(f"ADB路径: {self.adb_path}")
-        print(f"模拟器可执行文件路径: {self.nox_path}")
+    def __init__(self, path=None):
+        # 从配置文件读取模拟器路径
+        if path is None:
+            try:
+                if os.path.exists('app_config.json'):
+                    with open('app_config.json', 'r', encoding='utf-8') as f:
+                        config = json.load(f)
+                        path = config.get('simulator_path', "D:\\Program Files\\Nox\\bin")
+                else:
+                    path = "D:\\Program Files\\Nox\\bin"
+            except Exception as e:
+                logger.error(f"读取配置文件失败: {e}")
+                path = "D:\\Program Files\\Nox\\bin"  # 默认路径
         
+        self.path = path
+        # 添加adb_path属性，指向adb.exe文件
+        self.adb_path = os.path.join(self.path, "adb.exe")
+        logger.info(f"初始化模拟器控制器，模拟器路径: {self.path}")
+        logger.info(f"ADB路径: {self.adb_path}")
+    
     def execute_adb_command(self, command):
         """执行ADB命令"""
         try:
-            if not os.path.exists(self.adb_path):
-                print(f"ADB路径不存在: {self.adb_path}")
-                return None
-                
-            full_command = f'"{self.adb_path}" {command}'
-            print(f"执行命令: {full_command}")
-            result = subprocess.run(full_command, shell=True, capture_output=True, text=True)
-            print(f"命令输出: {result.stdout}")
-            return result.stdout
-        except Exception as e:
-            print(f"执行ADB命令失败: {str(e)}")
-            return None
-            
-    def tap_screen(self, x, y):
-        """模拟屏幕点击"""
-        command = f"shell input tap {x} {y}"
-        return self.execute_adb_command(command)
-            
-    def check_adb_connection(self):
-        """检查ADB连接状态"""
-        try:
-            if not os.path.exists(self.adb_path):
-                print(f"ADB路径不存在: {self.adb_path}")
-                return False
-                
-            # 首先检查设备列表
-            result = subprocess.run(
-                [self.adb_path, "devices"], 
-                capture_output=True, 
-                text=True,
+            full_command = f'"{os.path.join(self.path, "adb.exe")}" {command}'
+            logger.debug(f"执行ADB命令: {full_command}")
+            process = subprocess.run(
+                full_command, 
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 encoding='utf-8',
                 errors='ignore'
             )
-            print(f"设备列表: {result.stdout}")
-            
-            # 检查是否有127.0.0.1:62001设备
-            if "127.0.0.1:62001" in result.stdout:
-                # 尝试连接设备
-                connect_cmd = subprocess.run(
-                    [self.adb_path, "connect", "127.0.0.1:62001"], 
-                    capture_output=True, 
-                    text=True,
-                    encoding='utf-8',
-                    errors='ignore'
-                )
-                print(f"连接命令结果: {connect_cmd.stdout}")
-                
-                # 再次检查设备列表
-                result = subprocess.run(
-                    [self.adb_path, "devices"], 
-                    capture_output=True, 
-                    text=True,
-                    encoding='utf-8',
-                    errors='ignore'
-                )
-                print(f"重新检查设备列表: {result.stdout}")
-                
-                if "127.0.0.1:62001" in result.stdout and "device" in result.stdout:
-                    print("ADB连接成功")
-                    return True
-            
-            print("ADB连接失败")
-            return False
+            if process.returncode != 0:
+                logger.warning(f"ADB命令返回非零状态: {process.returncode}")
+                logger.warning(f"错误输出: {process.stderr}")
+            return process.stdout.strip()
         except Exception as e:
-            print(f"检查ADB连接失败: {str(e)}")
+            logger.error(f"执行ADB命令失败: {e}")
+            return ""
+    
+    def check_connection(self):
+        """检查ADB连接状态"""
+        try:
+            # 使用改进后的EmulatorImproved类检查ADB连接
+            with EmulatorImproved(self.path) as emulator:
+                return emulator.check_adb_connection()
+        except Exception as e:
+            logger.error(f"检查ADB连接失败: {e}")
             return False
-            
+    
+    # 为兼容性保留此方法
+    def check_adb_connection(self):
+        """检查ADB连接状态（兼容性方法）"""
+        logger.info("调用check_adb_connection方法")
+        return self.check_connection()
+    
     def start_simulator(self):
-        """启动模拟器并显示窗口"""
+        """启动模拟器并连接"""
         try:
-            if not os.path.exists(self.nox_path):
-                print(f"模拟器路径不存在: {self.nox_path}")
-                return False
-                
-            print("正在启动模拟器...")
-            # 使用引号包裹路径
-            command = f'start "" "{self.nox_path}"'
-            print(f"执行启动命令: {command}")
-            process = subprocess.Popen(
-                command,
-                shell=True,
-                creationflags=subprocess.CREATE_NEW_CONSOLE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            print(f"模拟器进程已启动，PID: {process.pid}")
-            
-            # 等待模拟器窗口出现
-            max_wait = 30  # 最多等待30秒
-            for i in range(max_wait):
-                # 检查窗口
-                if self.is_simulator_window_visible():
-                    print("模拟器窗口已显示")
-                    return True
-                    
-                time.sleep(1)
-                print(f"等待模拟器窗口... {i+1}/{max_wait}")
-                
-            print("模拟器窗口未显示")
-            return False
+            # 使用改进后的EmulatorImproved类启动模拟器
+            emulator = EmulatorImproved(self.path)
+            connection_result = emulator.check_adb_connection()
+            logger.info(f"启动模拟器连接结果: {connection_result}")
+            return connection_result
         except Exception as e:
-            print(f"启动模拟器失败: {str(e)}")
+            logger.error(f"启动模拟器失败: {e}")
             return False
-            
-    def is_simulator_window_visible(self):
-        """检查模拟器窗口是否可见"""
+    
+    def tap_screen(self, x, y):
+        """模拟屏幕点击"""
         try:
-            def callback(hwnd, extra):
-                if win32gui.IsWindowVisible(hwnd):
-                    title = win32gui.GetWindowText(hwnd)
-                    if "夜神模拟器" in title:
-                        print(f"找到模拟器窗口: {title}")
-                        extra.append(hwnd)
-                return True
-                
-            windows = []
-            win32gui.EnumWindows(callback, windows)
-            return len(windows) > 0
-        except Exception as e:
-            print(f"检查模拟器窗口失败: {str(e)}")
-            return False
-            
-    def bring_simulator_to_front(self):
-        """将模拟器窗口置顶"""
-        try:
-            # 查找夜神模拟器窗口
-            def callback(hwnd, extra):
-                if win32gui.IsWindowVisible(hwnd):
-                    title = win32gui.GetWindowText(hwnd)
-                    if "夜神模拟器" in title:
-                        # 将窗口置顶
-                        win32gui.SetForegroundWindow(hwnd)
-                        win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
-                        return False
-                return True
-                
-            win32gui.EnumWindows(callback, None)
-        except Exception as e:
-            print(f"置顶模拟器窗口失败: {str(e)}")
-
-    def subscription(self, params):
-        """执行完整申购操作，直接调用 Emulator 里的自动申购逻辑"""
-        try:
-            account = params.get('account', "")
-            password = params.get('password', "")
-            if not account or not password:
-                print("缺少账号或密码，无法申购")
-                return False
-
-            with Emulator(self.nox_path) as emulator:
-                if not emulator.device:
-                    print("模拟器未连接，无法进行申购")
-                    return False
-
-                class SimpleUser:
-                    def __init__(self, account, password):
-                        self.account = account
-                        self.password = password
-                user = SimpleUser(account, password)
-                emulator.subscription(user)
+            command = f'shell input tap {x} {y}'
+            result = self.execute_adb_command(command)
+            logger.debug(f"点击屏幕坐标 ({x}, {y}) 结果: {result}")
             return True
         except Exception as e:
-            print(f"申购操作失败: {str(e)}")
+            logger.error(f"点击屏幕失败: {e}")
             return False
+    
+    def subscription(self, user):
+        """进行申购操作"""
+        try:
+            # 使用改进后的EmulatorImproved类进行申购
+            with EmulatorImproved(self.path) as emulator:
+                if emulator.device:
+                    # 检查user是字典还是对象
+                    account = user.get('account') if isinstance(user, dict) else getattr(user, 'account', '')
+                    logger.info(f"用户 {account} 开始申购操作")
+                    result = emulator.subscription(user)
+                    logger.info(f"用户 {account} 申购结果: {result}")
+                    return result
+                else:
+                    logger.error("无法连接到模拟器设备")
+                    return False
+        except Exception as e:
+            logger.error(f"申购操作失败: {e}")
+            return False
+
+# 测试代码
+if __name__ == "__main__":
+    # 设置日志
+    logger.add("simulator_test.log", rotation="1 MB")
+    
+    # 测试模拟器控制器
+    simulator = SimulatorController()
+    connection_result = simulator.check_connection()
+    print(f"模拟器连接状态: {connection_result}")
+    
+    if not connection_result:
+        print("尝试启动模拟器...")
+        start_result = simulator.start_simulator()
+        print(f"启动模拟器结果: {start_result}")
+    
+    # 测试点击操作
+    if connection_result or start_result:
+        # 简单测试点击屏幕中心
+        tap_result = simulator.tap_screen(200, 400)
+        print(f"点击屏幕结果: {tap_result}")

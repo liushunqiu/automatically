@@ -280,7 +280,8 @@ class MainWindow(QMainWindow):
         # SettingsDialog 现在是从 ui.settings_dialog 导入的
         dialog = SettingsDialog(self, path=current_path, broker_package=current_package)
         if dialog.exec(): # 如果用户点击OK
-            new_path, new_package = dialog.get_settings()
+            new_path = dialog.get_simulator_path()
+            new_package = dialog.get_broker_package()
             # 检查路径或包名是否真的改变了
             path_changed = new_path != current_path
             package_changed = new_package != current_package
@@ -299,9 +300,6 @@ class MainWindow(QMainWindow):
                     # 使用 set_broker_package_name，它内部会调用 save_config
                     self.config.set_broker_package_name(new_package)
                     self.log_message("券商APP包名已更新并保存。")
-
-                # 不再需要单独调用 self.config.save_config()，因为 setter 内部会调用
-                # self.log_message("设置已保存。") # 可以移除或修改日志信息
 
                 # 如果路径改变，重新检查连接状态
                 if path_changed:
