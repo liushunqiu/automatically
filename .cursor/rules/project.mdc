@@ -6,64 +6,127 @@ alwaysApply: false
 # 项目规则文档
 
 ## 项目概述
-这是一个自动化交易系统，主要包含模拟器控制、UI界面和自动化交易功能。
+这是一个基于Python的自动化交易系统，主要用于控制夜神模拟器（Nox）执行申购流程。系统通过uiautomator2与Android模拟器交互，实现对同花顺APP的自动化操作，完成股票申购过程。
 
 ## 主要组件
 
 ### 核心模块
-- `main.py`: 主程序入口，负责系统初始化和主要流程控制
-- `emulator.py`: 模拟器控制模块，处理模拟器的启动、关闭和操作
-- `simulator.py`: 模拟器配置和状态管理
-- `automation.py`: 自动化交易逻辑实现
-- `config.py`: 系统配置管理
+- `main.py`: 主程序入口，负责创建和管理GUI界面，处理用户交互
+- `emulator_improved.py`: 核心模拟器控制模块，处理模拟器的启动、连接和操作
+- `simulator.py`: 模拟器控制器，封装了对`emulator_improved.py`的调用
+- `automation.py`: 自动化交易逻辑实现，处理具体业务流程
+- `config.py`: 系统配置管理，处理配置文件读写和参数管理
+- `run.py`: 程序启动器，检查环境依赖并启动主程序
 
 ### 数据层
-- `mydatabase.db`: SQLite数据库文件
+- `mydatabase.db`: SQLite数据库文件，存储用户账号等信息
 - `entity/`: 数据模型和实体类目录
+  - `base_model.py`: 基础模型类，定义共享数据库连接
+  - `user.py`: 用户模型，存储账号、密码等信息
+  - `user_subscription_record.py`: 用户申购记录模型
 
 ### 用户界面
 - `ui/`: UI相关组件目录
+  - `account_dialog.py`: 账号管理对话框
+  - `settings_dialog.py`: 系统设置对话框
 - 使用PyQt6框架构建界面
 
 ### 工作进程
 - `workers/`: 后台工作进程目录
+  - `adb_worker.py`: ADB操作的异步处理线程
 
-## 依赖项
-- PyQt6: UI框架
-- uiautomator2: Android设备控制
-- pywin32: Windows系统API调用
-- pyinstaller: 应用打包
-- peewee: ORM数据库操作
+## 技术选型
+- **UI框架**: PyQt6，用于构建桌面应用界面
+- **自动化控制**: uiautomator2 2.11.0，用于Android设备控制
+- **日志管理**: loguru，用于全面的日志记录
+- **数据库ORM**: peewee，用于对象关系映射
+- **系统交互**: pywin32，用于Windows系统API调用
+- **打包工具**: pyinstaller，用于打包可执行文件
 
 ## 配置文件
 - `app_config.json`: 应用配置，包含模拟器路径、包名和坐标信息
-- `simulator_config.txt`: 模拟器配置
+  ```json
+  {
+    "simulator_path": "路径到Nox模拟器的bin目录",
+    "simulator_exe_path": "Nox.exe的完整路径",
+    "broker_package": "com.hexin.plat.android",
+    "coordinates": {
+      "select_x": 201,
+      "select_y": 785,
+      "subscribe_x": 332,
+      "subscribe_y": 783,
+      "confirm_x": 197,
+      "confirm_y": 916
+    }
+  }
+  ```
+- `simulator_config.txt`: 模拟器配置参数
 - `requirements.txt`: Python依赖管理
 
 ## 项目结构
 ```
 .
 ├── .cursor/          # Cursor IDE配置
-├── .git/            # Git版本控制
-├── workers/         # 工作进程
-├── ui/             # 用户界面组件
-├── entity/         # 数据模型
-├── mydatabase.db   # SQLite数据库
-├── requirements.txt # 项目依赖
-├── simulator.py    # 模拟器控制
-├── simulator_config.txt # 模拟器配置
-├── emulator.py     # 模拟器操作
-├── main.py         # 主程序
-├── app_config.json # 应用配置
-├── automation.py   # 自动化交易
-└── config.py       # 配置管理
+├── .git/             # Git版本控制
+├── entity/           # 数据模型目录
+│   ├── base_model.py      # 基础模型类
+│   ├── user.py            # 用户模型
+│   └── user_subscription_record.py  # 申购记录模型
+├── ui/               # 用户界面组件目录
+│   ├── account_dialog.py   # 账号管理对话框
+│   └── settings_dialog.py  # 设置对话框
+├── workers/          # 工作进程目录
+│   └── adb_worker.py       # ADB操作的异步处理线程
+├── app_config.json    # 应用配置文件
+├── automation.py      # 自动化交易逻辑
+├── config.py          # 配置管理
+├── emulator_improved.py  # 核心模拟器控制模块
+├── main.py            # 主程序入口
+├── mydatabase.db      # SQLite数据库
+├── README.md          # 项目文档
+├── requirements.txt   # 项目依赖
+├── run.py             # 程序启动器
+├── simulator.py       # 模拟器控制器
+└── simulator_config.txt  # 模拟器配置
 ```
 
 ## 开发规范
-1. 使用Python 3.x版本
-2. 遵循PEP 8编码规范
-3. 使用SQLite作为数据库
-4. 使用PyQt6构建UI界面
-5. 配置文件使用JSON格式
+1. **编码规范**: 遵循PEP 8编码规范
+2. **Python版本**: 使用Python 3.x版本开发
+3. **文档规范**: 为函数和类提供清晰的文档字符串
+4. **错误处理**: 使用try-except捕获异常，避免程序崩溃
+5. **日志记录**: 使用loguru进行日志记录，便于调试和问题追踪
+6. **数据库**: 使用SQLite作为数据库，通过peewee ORM操作
+7. **配置管理**: 使用JSON格式存储配置信息
+8. **UI设计**: 使用PyQt6构建简洁、易用的界面
+9. **版本控制**: 使用Git进行版本控制
+10. **依赖管理**: 在requirements.txt中明确指定依赖版本
+
+## 功能模块
+1. **模拟器控制**: 
+   - 启动/关闭模拟器
+   - 建立ADB连接
+   - 控制UI操作
+   
+2. **账号管理**:
+   - 添加/编辑/删除账号
+   - 存储账号信息
+   
+3. **自动化交易**:
+   - 打开同花顺APP
+   - 登录账号
+   - 执行申购操作
+   
+4. **配置管理**:
+   - 模拟器路径配置
+   - UI坐标配置
+   - 券商APP配置
+
+## 排错指南
+- 检查模拟器路径配置是否正确
+- 确认uiautomator2版本为2.11.0，避免API兼容性问题
+- 使用日志输出诊断连接和操作过程中的问题
+- 对于UI交互问题，检查坐标配置是否匹配实际界面
+
 
 
