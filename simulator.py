@@ -4,6 +4,7 @@ import subprocess
 import time
 from loguru import logger
 from emulator_improved import EmulatorImproved
+from contextlib import contextmanager
 
 class SimulatorController:
     def __init__(self, path=None):
@@ -104,6 +105,23 @@ class SimulatorController:
         except Exception as e:
             logger.error(f"申购操作失败: {e}")
             return False
+
+    @contextmanager
+    def connect(self):
+        """连接到模拟器"""
+        try:
+            if not self.emulator:
+                self.emulator = EmulatorImproved(self.path)
+                # 只在第一次连接时启动模拟器
+                if not self.is_running:
+                    self.start()
+            
+            # 使用现有的模拟器连接
+            with self.emulator as device:
+                yield device
+        except Exception as e:
+            logger.error(f"连接模拟器失败: {str(e)}")
+            raise
 
 # 测试代码
 if __name__ == "__main__":

@@ -124,18 +124,16 @@ class EmulatorImproved:
 
     # 自动销毁触发
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """退出上下文管理器时的处理"""
+        # 不再自动关闭模拟器
         if self.device:
-            logger.info("执行代码结束,准备关闭模拟器")
+            logger.info("断开模拟器连接")
             try:
-                # 使用适当的方式关闭模拟器
-                adb_path = self.find_adb_executable()
-                if adb_path:
-                    # 使用taskkill命令关闭，避免权限问题
-                    logger.info("尝试使用系统命令关闭模拟器...")
-                    self.run_command("taskkill /F /IM Nox.exe")
-                    logger.info("模拟器关闭命令已发送")
+                # 只断开连接，不关闭模拟器
+                if hasattr(self.device, 'disconnect'):
+                    self.device.disconnect()
             except Exception as e:
-                logger.error("关闭模拟器失败: {}", str(e))
+                logger.error(f"断开模拟器连接失败: {str(e)}")
 
     # 将账号中间设置为*号
     @staticmethod
