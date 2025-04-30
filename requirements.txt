@@ -7,3 +7,4 @@ peewee>=3.0.0 # 添加 peewee 依赖
 loguru>=0.6.0 # 添加loguru日志库依赖
 # 如果使用了 dbutils.pooled_db，也需要添加
 # DBUtils>=2.0
+requests>=2.31.0
