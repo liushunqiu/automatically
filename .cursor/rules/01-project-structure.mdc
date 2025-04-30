@@ -1,0 +1,32 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 项目结构指南
+
+本项目是一个自动化系统实现，主要包含以下核心组件：
+
+## 主要入口点
+- [main.py](mdc:main.py) - 主程序入口文件
+- [run.py](mdc:run.py) - 运行时启动脚本
+- [automation.py](mdc:automation.py) - 自动化核心逻辑实现
+
+## 配置文件
+- [config.py](mdc:config.py) - 主要配置管理
+- [app_config.json](mdc:app_config.json) - 应用程序配置
+- [simulator_config.txt](mdc:simulator_config.txt) - 模拟器配置
+
+## 核心功能模块
+- [emulator_improved.py](mdc:emulator_improved.py) - 改进版模拟器实现
+- [simulator.py](mdc:simulator.py) - 基础模拟器
+
+## 项目目录结构
+- `core/` - 核心功能实现
+- `data/` - 数据存储和处理
+- `ui/` - 用户界面相关
+- `utils/` - 工具函数
+- `workers/` - 工作进程实现
+- `entity/` - 实体类定义
+- `logs/` - 日志文件存储
+

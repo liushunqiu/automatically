@@ -1,0 +1,30 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 开发指南
+
+## 环境设置
+本项目使用 Python 开发，环境依赖在 [requirements.txt](mdc:requirements.txt) 中定义。请确保在开始开发前：
+
+1. 创建并激活虚拟环境
+2. 安装所有依赖：`pip install -r requirements.txt`
+
+## 配置管理
+- 所有配置更改应在 [config.py](mdc:config.py) 中进行
+- 应用程序运行时配置在 [app_config.json](mdc:app_config.json) 中定义
+- 模拟器特定配置在 [simulator_config.txt](mdc:simulator_config.txt) 中设置
+
+## 数据库
+项目使用 SQLite 数据库 [mydatabase.db](mdc:mydatabase.db) 存储数据。
+
+## 日志记录
+- 所有日志文件存储在 `logs/` 目录下
+- 请遵循现有的日志格式和级别设置
+
+## 代码风格
+- 遵循 PEP 8 编码规范
+- 所有新功能都需要添加适当的注释和文档
+- 主要功能更改需要更新 [README.md](mdc:README.md)
+

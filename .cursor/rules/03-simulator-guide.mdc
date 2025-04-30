@@ -1,0 +1,34 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 模拟器使用指南
+
+## 模拟器组件
+项目包含两个主要的模拟器实现：
+
+1. [simulator.py](mdc:simulator.py) - 基础模拟器
+   - 提供基本的模拟功能
+   - 适用于简单场景测试
+
+2. [emulator_improved.py](mdc:emulator_improved.py) - 改进版模拟器
+   - 提供更高级的模拟特性
+   - 支持复杂场景和高级功能
+   - 建议优先使用此版本
+
+## 配置说明
+- 模拟器配置位于 [simulator_config.txt](mdc:simulator_config.txt)
+- 运行时参数可在 [app_config.json](mdc:app_config.json) 中调整
+
+## 自动化集成
+[automation.py](mdc:automation.py) 提供了与模拟器交互的自动化接口，用于：
+- 自动化测试
+- 场景重现
+- 性能评估
+
+## 最佳实践
+- 在开发新功能时优先使用改进版模拟器
+- 确保所有模拟场景都有适当的日志记录
+- 遵循现有的错误处理机制
+

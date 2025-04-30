@@ -1,0 +1,30 @@
+name: Check New Debt
+
+on:
+  schedule:
+    # 每天北京时间9:00运行
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+jobs:
+  check-debt:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+        
+    - name: Run debt checker
+      env:
+        WECHAT_WEBHOOK_URL: ${{ secrets.WECHAT_WEBHOOK_URL }}
+      run: |
+        python utils/check_debt.py 
