@@ -1,13 +1,27 @@
 import os
 import logging
 from notifier import DebtNotifier
+import pytz
+from datetime import datetime
 
-# 配置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+# 定义北京时间Formatter
+class BeijingFormatter(logging.Formatter):
+    def formatTime(self, record, datefmt=None):
+        beijing_tz = pytz.timezone('Asia/Shanghai')
+        ct = datetime.fromtimestamp(record.created, beijing_tz)
+        if datefmt:
+            s = ct.strftime(datefmt)
+        else:
+            s = ct.isoformat()
+        return s
+
+# 配置日志，使用北京时间
+handler = logging.StreamHandler()
+formatter = BeijingFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+logger.handlers = [handler]
 
 def main():
     # 从环境变量获取企业微信webhook地址

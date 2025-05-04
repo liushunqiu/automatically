@@ -1,7 +1,7 @@
 {
-    "simulator_path": "D:/rio.liu/Nox/bin",
+    "simulator_path": "D:/Program Files/Nox/bin",
     "broker_package": "com.hexin.plat.android",
-    "simulator_exe_path": "D:\\rio.liu\\Nox\\bin\\Nox.exe",
+    "simulator_exe_path": "D:\\Program Files\\Nox\\bin\\Nox.exe",
     "coordinates": {
         "select_x": 201,
         "select_y": 785,
