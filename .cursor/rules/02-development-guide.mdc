@@ -10,14 +10,33 @@ alwaysApply: false
 
 1. 创建并激活虚拟环境
 2. 安装所有依赖：`pip install -r requirements.txt`
+3. 安装夜神模拟器(Nox)并确保可以正常启动
 
 ## 配置管理
-- 所有配置更改应在 [config.py](mdc:config.py) 中进行
+- 所有配置管理逻辑在 [config.py](mdc:config.py) 中实现
 - 应用程序运行时配置在 [app_config.json](mdc:app_config.json) 中定义
 - 模拟器特定配置在 [simulator_config.txt](mdc:simulator_config.txt) 中设置
 
 ## 数据库
-项目使用 SQLite 数据库 [mydatabase.db](mdc:mydatabase.db) 存储数据。
+项目使用 SQLite 数据库 [mydatabase.db](mdc:mydatabase.db) 存储数据：
+- 数据库模型定义在 `entity/` 目录中
+- 所有数据模型继承自 [entity/base_model.py](mdc:entity/base_model.py)
+- 主要实体包括 [user.py](mdc:entity/user.py) 和 [user_subscription_record.py](mdc:entity/user_subscription_record.py)
+
+## 用户界面开发
+- 本项目使用 PyQt6 构建用户界面
+- UI组件位于 `ui/` 目录中
+- 主界面在 [main.py](mdc:main.py) 中定义和管理
+- 对话框组件应该放在 `ui/` 目录下
+
+## 自动化流程
+- 自动化核心逻辑在 [automation.py](mdc:automation.py) 中实现
+- 模拟器控制由 [emulator_improved.py](mdc:emulator_improved.py) 和 [simulator.py](mdc:simulator.py) 提供
+
+## 异步处理
+- 长时间运行的任务应该在后台线程中执行
+- 后台工作线程应该放在 `workers/` 目录中
+- 参考 [workers/adb_worker.py](mdc:workers/adb_worker.py) 的实现
 
 ## 日志记录
 - 所有日志文件存储在 `logs/` 目录下
@@ -25,6 +44,7 @@ alwaysApply: false
 
 ## 代码风格
 - 遵循 PEP 8 编码规范
-- 所有新功能都需要添加适当的注释和文档
+- 所有函数和类都应该添加适当的文档字符串
 - 主要功能更改需要更新 [README.md](mdc:README.md)
+- 使用异常处理捕获可能的错误，避免程序崩溃
 

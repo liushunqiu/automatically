@@ -6,29 +6,58 @@ alwaysApply: false
 # 模拟器使用指南
 
 ## 模拟器组件
-项目包含两个主要的模拟器实现：
+项目包含两个主要的模拟器相关模块：
 
-1. [simulator.py](mdc:simulator.py) - 基础模拟器
-   - 提供基本的模拟功能
-   - 适用于简单场景测试
+1. [simulator.py](mdc:simulator.py) - 模拟器控制器
+   - 封装了对`emulator_improved.py`的高级调用
+   - 管理模拟器的启动、连接和基本操作
+   - 提供简化的模拟器控制API
 
-2. [emulator_improved.py](mdc:emulator_improved.py) - 改进版模拟器
-   - 提供更高级的模拟特性
-   - 支持复杂场景和高级功能
-   - 建议优先使用此版本
+2. [emulator_improved.py](mdc:emulator_improved.py) - 改进版模拟器实现
+   - 直接与ADB进行交互
+   - 提供底层设备控制功能
+   - 实现复杂的屏幕操作和交互逻辑
 
 ## 配置说明
-- 模拟器配置位于 [simulator_config.txt](mdc:simulator_config.txt)
-- 运行时参数可在 [app_config.json](mdc:app_config.json) 中调整
+- 模拟器路径配置在 [app_config.json](mdc:app_config.json) 中设置
+  ```json
+  {
+    "simulator_path": "D:\\Program Files\\Nox\\bin",
+    "simulator_exe_path": "D:\\Program Files\\Nox\\bin\\Nox.exe"
+  }
+  ```
+- 屏幕坐标配置也在 [app_config.json](mdc:app_config.json) 中定义
+  ```json
+  {
+    "coordinates": {
+      "select_x": 201,
+      "select_y": 785,
+      "subscribe_x": 332,
+      "subscribe_y": 783,
+      "confirm_x": 197,
+      "confirm_y": 916
+    }
+  }
+  ```
+- 特定模拟器参数在 [simulator_config.txt](mdc:simulator_config.txt) 中配置
 
 ## 自动化集成
-[automation.py](mdc:automation.py) 提供了与模拟器交互的自动化接口，用于：
-- 自动化测试
-- 场景重现
-- 性能评估
+[automation.py](mdc:automation.py) 提供了完整的自动化流程，包括：
+- 启动模拟器
+- 连接设备
+- 打开指定应用程序
+- 登录账号
+- 执行申购操作
+- 处理常见异常情况
+
+## ADB操作
+- ADB命令通过 [workers/adb_worker.py](mdc:workers/adb_worker.py) 在后台线程中执行
+- ADB连接地址通常为 `127.0.0.1:62001`（夜神模拟器默认）
+- 模拟器通过uiautomator2库实现UI交互
 
 ## 最佳实践
-- 在开发新功能时优先使用改进版模拟器
-- 确保所有模拟场景都有适当的日志记录
-- 遵循现有的错误处理机制
+- 确保夜神模拟器已正确安装并能正常启动
+- 验证 [app_config.json](mdc:app_config.json) 中的模拟器路径配置正确
+- 坐标值可能需要根据不同分辨率的模拟器进行调整
+- 使用 [ui/settings_dialog.py](mdc:ui/settings_dialog.py) 管理模拟器路径和应用包名
 

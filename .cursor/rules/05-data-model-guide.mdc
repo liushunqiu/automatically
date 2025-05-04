@@ -1,0 +1,100 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 数据模型指南
+
+## 数据库概述
+系统使用SQLite数据库 [mydatabase.db](mdc:mydatabase.db) 存储数据，通过peewee ORM框架进行操作。主要表结构包括：
+
+- 用户表：存储账号信息
+- 申购记录表：记录每次申购操作的结果
+
+## 实体模型
+
+### [entity/base_model.py](mdc:entity/base_model.py)
+基础模型类提供共享的数据库连接和基本功能：
+- 定义数据库连接
+- 提供共享的基类功能
+- 所有其他模型继承自这个基类
+
+### [entity/user.py](mdc:entity/user.py)
+用户模型存储账号信息：
+- 账号（用于登录）
+- 密码
+- 用户名（备注）
+- 创建和更新时间戳
+
+### [entity/user_subscription_record.py](mdc:entity/user_subscription_record.py)
+申购记录模型记录每次申购操作：
+- 关联的用户ID
+- 申购时间
+- 申购结果
+- 错误信息（如果有）
+
+## 数据库操作
+
+### 初始化
+数据库初始化在 [main.py](mdc:main.py) 的 `init_database` 方法中完成：
+```python
+def init_database(self):
+    """初始化数据库连接和创建表"""
+    try:
+        User.create_table(safe=True)
+        self.log_message("数据库初始化成功")
+    except Exception as e:
+        self.log_message(f"数据库初始化失败: {e}")
+```
+
+### 账号管理
+账号管理对话框 [ui/account_dialog.py](mdc:ui/account_dialog.py) 实现以下数据操作：
+- 查询所有账号
+- 添加新账号
+- 更新现有账号
+- 删除账号
+
+### 申购记录
+申购操作完成后，系统记录申购结果：
+```python
+# 伪代码示例
+def record_subscription_result(user, result, error=None):
+    UserSubscriptionRecord.create(
+        user=user,
+        result=result,
+        error_message=error,
+        created_at=datetime.now()
+    )
+```
+
+## 数据模型扩展指南
+
+### 添加新模型
+1. 创建新的模型类文件，放在 `entity/` 目录下
+2. 继承 `BaseModel` 类
+3. 定义字段和元数据
+4. 在启动时添加表创建代码
+
+### 模型示例模板
+```python
+from entity.base_model import BaseModel
+import peewee as pw
+from datetime import datetime
+
+class NewModel(BaseModel):
+    name = pw.CharField()
+    value = pw.IntegerField()
+    description = pw.TextField(null=True)
+    created_at = pw.DateTimeField(default=datetime.now)
+    
+    class Meta:
+        table_name = 'new_model_table'
+```
+
+### 最佳实践
+- 为每个字段添加适当的约束（如 `null=True`、`unique=True`）
+- 使用适当的字段类型（CharField、IntegerField、BooleanField等）
+- 添加创建和更新时间戳字段跟踪记录历史
+- 使用外键关联相关模型
+- 在模型类中添加辅助方法简化常见操作
+
