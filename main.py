@@ -6,8 +6,11 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QPushButton, QVBoxLayout
                              QMessageBox, QLabel, QHBoxLayout, QTextEdit, QDialog,
                              QFormLayout, QSpinBox, QDialogButtonBox, QTabWidget,
                              QLineEdit, QFileDialog, QGridLayout, QMenuBar, QMenu,
-                             QTableWidget, QTableWidgetItem, QHeaderView)
+                             QTableWidget, QTableWidgetItem, QHeaderView, QSplitter,
+                             QFrame)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
+from PyQt6.QtGui import QPixmap
+import subprocess
 import json
 from config import Config
 from simulator import SimulatorController # 假设模拟器控制逻辑在 SimulatorController 中
@@ -17,6 +20,7 @@ from workers.adb_worker import AdbWorker # 从 workers 子目录导入
 # --- 从 ui 目录导入对话框 ---
 from ui.account_dialog import AccountDialog
 from ui.settings_dialog import SettingsDialog
+from emulator_widget import EmulatorWidget
 
 
 # 获取当前目录
@@ -29,7 +33,7 @@ class MainWindow(QMainWindow):
         """初始化主窗口"""
         super().__init__()
         self.setWindowTitle("自动申购助手")
-        self.setGeometry(100, 100, 800, 600) # 设置窗口初始大小
+        self.setGeometry(100, 100, 1200, 800) # 增大窗口初始大小以更好地显示模拟器
 
         # 初始化配置和模拟器对象
         self.config = Config()
@@ -75,29 +79,47 @@ class MainWindow(QMainWindow):
         # --- 主布局 ---
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
-        main_layout = QVBoxLayout(main_widget)
+        main_layout = QHBoxLayout(main_widget)  # 改为水平布局
+
+        # --- 左侧控制面板 ---
+        left_panel = QWidget()
+        left_layout = QVBoxLayout(left_panel)
+        left_panel.setMaximumWidth(350)  # 减小左侧面板宽度，给模拟器更多空间
+        left_panel.setMinimumWidth(300)  # 设置最小宽度确保控件不会太挤
 
         # --- 状态标签 ---
-        self.status_label = QLabel("状态：初始化中...") # 初始状态可以更明确
-        main_layout.addWidget(self.status_label)
+        self.status_label = QLabel("状态：初始化中...")
+        left_layout.addWidget(self.status_label)
 
         # --- 按钮区域 ---
-        button_layout = QHBoxLayout()
+        button_layout = QVBoxLayout()  # 改为垂直布局
         self.connect_btn = QPushButton("连接模拟器")
         self.connect_btn.clicked.connect(self.connect_emulator)
         button_layout.addWidget(self.connect_btn)
 
         self.subscribe_btn = QPushButton("开始自动申购")
         self.subscribe_btn.clicked.connect(self.start_subscription)
-        self.subscribe_btn.setEnabled(False) # 初始状态不可用
+        self.subscribe_btn.setEnabled(False)
         button_layout.addWidget(self.subscribe_btn)
 
-        main_layout.addLayout(button_layout)
+        left_layout.addLayout(button_layout)
 
         # --- 日志区域 ---
-        self.log_output = QTextEdit() # 初始化 self.log_output
+        self.log_output = QTextEdit()
         self.log_output.setReadOnly(True)
-        main_layout.addWidget(self.log_output)
+        self.log_output.setMaximumHeight(250)  # 减小日志区域高度
+        self.log_output.setMinimumHeight(200)  # 设置最小高度确保可读性
+        left_layout.addWidget(self.log_output)
+
+        # 添加弹性空间
+        left_layout.addStretch()
+
+        # --- 右侧模拟器区域 ---
+        self.emulator_widget = EmulatorWidget()
+
+        # --- 添加到主布局 ---
+        main_layout.addWidget(left_panel, 0)  # 左侧面板固定大小
+        main_layout.addWidget(self.emulator_widget, 2)  # 给模拟器区域更大的伸缩比例
 
     def log_message(self, message):
         """在日志区域显示消息"""
@@ -324,26 +346,28 @@ class MainWindow(QMainWindow):
             event.accept()
 # --- 主程序入口 ---
 if __name__ == '__main__':
-    print("脚本开始执行...") # 添加启动打印语句
     try:
         app = QApplication(sys.argv)
-        print("QApplication 已创建")
+
+        # 设置应用程序属性
+        app.setApplicationName("自动申购助手")
+        app.setApplicationVersion("1.0")
+        app.setOrganizationName("AutoTrading")
 
         main_win = MainWindow()
-        print("MainWindow 实例已创建")
-
         main_win.show()
-        print("MainWindow.show() 已调用")
 
-        print("启动事件循环 app.exec()...")
+        # 启动事件循环
         exit_code = app.exec()
-        print(f"事件循环结束，退出码: {exit_code}")
         sys.exit(exit_code)
 
     except Exception as e:
-        print("\n--- 程序启动时发生未捕获的异常 ---")
-        import traceback
-        traceback.print_exc() # 打印详细的错误堆栈信息
-        print("------------------------------------\n")
-        input("按 Enter 键退出...") # 暂停窗口，以便查看错误信息
-        sys.exit(1) # 以错误码退出
+        # 如果出错，显示错误对话框而不是控制台
+        try:
+            error_app = QApplication(sys.argv) if not QApplication.instance() else QApplication.instance()
+            QMessageBox.critical(None, "程序启动错误",
+                               f"程序启动时发生错误:\n{str(e)}\n\n请检查依赖是否正确安装。")
+        except:
+            # 如果连错误对话框都无法显示，则输出到控制台
+            print(f"程序启动失败: {e}")
+        sys.exit(1)

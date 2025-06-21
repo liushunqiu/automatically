@@ -1,10 +1,6 @@
 import os
-import subprocess
-import time
 from PyQt6.QtCore import QThread, pyqtSignal
-from config import Config # 假设 Config 类在根目录的 config.py 中
-from simulator import SimulatorController  # 添加这行导入
-from emulator_improved import EmulatorImproved
+from simulator import SimulatorController
 
 class AdbWorker(QThread):
     """后台ADB操作线程"""
@@ -55,15 +51,15 @@ class AdbWorker(QThread):
 
             if self.cmd_type == 'connect':
                 self.update_signal.emit("正在连接到模拟器...")
-                # 使用改进的EmulatorImproved类
+                # 使用SimulatorController
                 try:
-                    # 创建EmulatorImproved实例
-                    self.update_signal.emit("正在创建EmulatorImproved实例...")
-                    emulator = EmulatorImproved(os.path.dirname(self.adb_path))
-                    
+                    # 创建SimulatorController实例
+                    self.update_signal.emit("正在创建模拟器控制器...")
+                    simulator = SimulatorController(os.path.dirname(self.adb_path))
+
                     # 执行连接操作
-                    self.update_signal.emit("开始执行EmulatorImproved.check_adb_connection()...")
-                    if emulator.check_adb_connection():
+                    self.update_signal.emit("开始执行连接检查...")
+                    if simulator.check_connection():
                         self.update_signal.emit("模拟器连接成功!")
                         self.finished_signal.emit(True, "模拟器连接成功")
                     else:
@@ -72,19 +68,19 @@ class AdbWorker(QThread):
                 except Exception as e:
                     self.update_signal.emit(f"连接过程出错: {str(e)}")
                     self.finished_signal.emit(False, f"连接错误: {str(e)}")
-                
+
                 return
             elif self.cmd_type == 'check':
                 self.update_signal.emit("正在检查模拟器连接状态...")
-                # 使用改进的EmulatorImproved类
+                # 使用SimulatorController
                 try:
-                    # 创建EmulatorImproved实例
-                    self.update_signal.emit("正在创建EmulatorImproved实例...")
-                    emulator = EmulatorImproved(os.path.dirname(self.adb_path))
-                    
-                    # 执行连接操作
-                    self.update_signal.emit("开始执行EmulatorImproved.check_adb_connection()...")
-                    if emulator.check_adb_connection():
+                    # 创建SimulatorController实例
+                    self.update_signal.emit("正在创建模拟器控制器...")
+                    simulator = SimulatorController(os.path.dirname(self.adb_path))
+
+                    # 执行连接检查
+                    self.update_signal.emit("开始执行连接检查...")
+                    if simulator.check_connection():
                         self.update_signal.emit("模拟器已连接!")
                         self.finished_signal.emit(True, "模拟器已连接")
                     else:
@@ -93,7 +89,7 @@ class AdbWorker(QThread):
                 except Exception as e:
                     self.update_signal.emit(f"检查连接时出错: {str(e)}")
                     self.finished_signal.emit(False, f"检查错误: {str(e)}")
-                
+
                 return
             elif self.cmd_type == 'subscribe':
                 self.update_signal.emit("开始全自动申购流程...")

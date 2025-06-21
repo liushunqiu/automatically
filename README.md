@@ -7,18 +7,22 @@
 ```
 .
 ├── entity/              # 数据实体模型
+│   ├── base_model.py    # 数据库基础模型
+│   ├── user.py          # 用户模型
+│   └── mydatabase.db    # SQLite数据库文件
 ├── ui/                  # 用户界面组件
+│   ├── account_dialog.py # 账号管理对话框
+│   └── settings_dialog.py # 设置对话框
 ├── workers/             # 后台工作线程
+│   └── adb_worker.py    # ADB操作工作线程
 ├── app_config.json      # 应用配置文件
-├── automation.py        # 自动化操作核心模块
 ├── config.py            # 配置管理类
-├── emulator_improved.py # 模拟器控制模块
 ├── main.py              # 主程序入口
 ├── mydatabase.db        # SQLite数据库文件
 ├── requirements.txt     # 项目依赖
-├── run.py               # 程序启动器
-├── simulator.py         # 模拟器控制器
-└── simulator_config.txt # 模拟器配置文件
+├── run.py               # 程序启动器（推荐使用）
+├── simple_emulator.py   # 简化的模拟器控制模块
+└── simulator.py         # 模拟器控制器
 ```
 
 ## 运行环境要求
@@ -101,9 +105,10 @@ python main.py
 
 ## 核心模块说明
 
-- `emulator_improved.py`: 模拟器连接和控制的核心功能
-- `workers/adb_worker.py`: ADB操作的异步处理线程
-- `simulator.py`: 对模拟器操作的高级封装
+- `simple_emulator.py`: 简化的模拟器连接和控制核心功能，专注于稳定连接
+- `simulator.py`: 模拟器控制器，提供高级接口和连接状态管理
+- `workers/adb_worker.py`: ADB操作的异步处理线程，避免界面阻塞
+- `main.py`: 主程序界面，提供完整的GUI操作界面
 
 ## 开发说明
 
